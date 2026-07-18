@@ -4,7 +4,7 @@ const svg = d3.select("svg");
 
 let data;
 
-d3.csv("world_cup.csv").then(function(csv) {
+d3.csv("fifa.csv").then(function(csv) {
 
     data = csv;
 
@@ -122,3 +122,58 @@ function scene1(){
         .text("Brazil has the most World Cup titles.");
 }
 
+function scene2() {
+
+    d3.select("#message")
+        .text("Scene 2: The World Cup has grown over time.");
+
+    let x = d3.scaleLinear()
+        .domain([1930, 2018])
+        .range([100, 800]);
+
+    let y = d3.scaleLinear()
+        .domain([0, 35])
+        .range([500, 50]);
+
+    svg.append("g")
+        .attr("transform", "translate(0,500)")
+        .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+    svg.append("g")
+        .attr("transform", "translate(100,0)")
+        .call(d3.axisLeft(y));
+
+    let line = d3.line()
+        .x(function(d) {
+            return x(d.Year);
+        })
+        .y(function(d) {
+            return y(d.QualifiedTeams);
+        });
+
+    svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 2)
+        .attr("d", line);
+
+    svg.selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+            return x(d.Year);
+        })
+        .attr("cy", function(d) {
+            return y(d.QualifiedTeams);
+        })
+        .attr("r", 5)
+        .attr("fill", "red");
+
+    svg.append("text")
+        .attr("x", 220)
+        .attr("y", 25)
+        .text("The tournament expanded from 13 teams to 32 teams.");
+
+}
