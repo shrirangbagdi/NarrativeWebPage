@@ -177,3 +177,119 @@ function scene2() {
         .text("The tournament expanded from 13 teams to 32 teams.");
 
 }
+
+
+function scene3() {
+
+    d3.select("#message")
+        .text("Scene 3: Click a country to see when it won.");
+
+    let wins = {};
+
+    data.forEach(function(d) {
+
+        if (wins[d.Winner] == null) {
+            wins[d.Winner] = 1;
+        }
+        else {
+            wins[d.Winner]++;
+        }
+
+    });
+
+    let chart = [];
+
+    for (let country in wins) {
+
+        chart.push({
+            country: country,
+            wins: wins[country]
+        });
+
+    }
+
+    chart.sort(function(a, b) {
+
+        return b.wins - a.wins;
+
+    });
+
+    let x = d3.scaleLinear()
+        .domain([0, 5])
+        .range([150, 800]);
+
+    let y = d3.scaleBand()
+        .domain(chart.map(function(d) {
+            return d.country;
+        }))
+        .range([50, 500])
+        .padding(0.2);
+
+    svg.append("g")
+        .attr("transform", "translate(150,0)")
+        .call(d3.axisLeft(y));
+
+    svg.append("g")
+        .attr("transform", "translate(0,500)")
+        .call(d3.axisBottom(x));
+
+    svg.selectAll("rect")
+        .data(chart)
+        .enter()
+        .append("rect")
+        .attr("x", 150)
+        .attr("y", function(d) {
+            return y(d.country);
+        })
+        .attr("width", function(d) {
+            return x(d.wins) - 150;
+        })
+        .attr("height", y.bandwidth())
+        .attr("fill", "steelblue")
+        .on("click", function(event, d) {
+
+            selectedCountry = d.country;
+
+            drawScene();
+
+        });
+
+    svg.selectAll(".label")
+        .data(chart)
+        .enter()
+        .append("text")
+        .attr("x", function(d) {
+            return x(d.wins) + 5;
+        })
+        .attr("y", function(d) {
+            return y(d.country) + y.bandwidth() / 2 + 5;
+        })
+        .text(function(d) {
+            return d.wins;
+        });
+
+    svg.append("text")
+        .attr("x", 240)
+        .attr("y", 25)
+        .text("Click a bar to see the years that country won.");
+
+    if (selectedCountry != "") {
+
+        let years = [];
+
+        data.forEach(function(d) {
+
+            if (d.Winner == selectedCountry) {
+                years.push(d.Year);
+            }
+
+        });
+
+        svg.append("text")
+            .attr("x", 150)
+            .attr("y", 560)
+            .text(selectedCountry + " won in: " + years.join(", "));
+
+    }
+
+}
